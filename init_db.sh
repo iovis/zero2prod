@@ -16,3 +16,4 @@ if ! [ -x "$(command -v sqlx)" ]; then
 fi
 
 sqlx database create
+sqlx migrate run
