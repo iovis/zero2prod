@@ -5,6 +5,5 @@ services:
     environment:
       POSTGRES_DB: newsletter
       POSTGRES_PASSWORD: password
-      POSTGRES_USER: $USER
     ports:
       - 5432:5432
