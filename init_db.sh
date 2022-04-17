@@ -17,3 +17,4 @@ fi
 
 sqlx database create
 sqlx migrate run
+cargo sqlx prepare -- --lib
