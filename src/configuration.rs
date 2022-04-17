@@ -1,5 +1,6 @@
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
+use serde_aux::prelude::deserialize_number_from_string;
 
 #[derive(Deserialize)]
 pub struct Settings {
@@ -10,16 +11,18 @@ pub struct Settings {
 #[derive(Deserialize)]
 pub struct ApplicationSettings {
     pub host: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
 }
 
 #[derive(Deserialize)]
 pub struct DatabaseSettings {
-    pub username: String,
-    pub password: Secret<String>,
-    pub port: u16,
-    pub host: String,
     pub database_name: String,
+    pub host: String,
+    pub password: Secret<String>,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+    pub username: String,
 }
 
 impl DatabaseSettings {
