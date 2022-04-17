@@ -93,5 +93,11 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         config::File::from(configuration_directory.join(environment.as_str())).required(true),
     )?;
 
+    // Allow environment variables to override settings
+    // Examples:
+    //   APP_APPLICATION__PORT=5001
+    //   APP_DATABASE__PASSWORD=banana
+    settings.merge(config::Environment::with_prefix("app").separator("__"))?;
+
     settings.try_into()
 }
