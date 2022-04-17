@@ -24,6 +24,13 @@ impl SubscriberName {
     }
 }
 
+// Allow borrows as str
+impl AsRef<str> for SubscriberName {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use claim::{assert_ok, assert_err};
