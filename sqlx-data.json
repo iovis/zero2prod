@@ -1,6 +1,69 @@
 {
   "db": "PostgreSQL",
-  "ba09b126ddbf3e1f15e1df7fd6576f9dfdd1347874ce318323267cc9704187c7": {
+  "7b57e2776a245ba1602f638121550485e2219a6ccaaa62b5ec3e4683e33a3b5f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "email",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT email\n        FROM subscriptions\n        WHERE status = 'confirmed'\n        "
+  },
+  "a71a1932b894572106460ca2e34a63dc0cb8c1ba7a70547add1cddbb68133c2b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE subscriptions SET status = 'confirmed' WHERE id = $1"
+  },
+  "b19bb964969904c7e1718adaca7a79f77fa64fa576df28a57bd77d32a062ea71": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscriber_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT subscriber_id FROM subscriptions_tokens WHERE subscription_token = $1"
+  },
+  "b75cba194d0dd4d5c17523a5683860020542961b3fbc31cbc43b76e183574de0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO subscriptions_tokens (subscription_token, subscriber_id) VALUES ($1, $2)"
+  },
+  "e6822c9e162eabc20338cc27d51a8e80578803ec1589c234d93c3919d14a96a6": {
     "describe": {
       "columns": [],
       "nullable": [],
@@ -13,6 +76,6 @@
         ]
       }
     },
-    "query": "\n        INSERT INTO subscriptions (id, email, name, subscribed_at, status)\n        VALUES ($1, $2, $3, $4, 'confirmed')\n        "
+    "query": "\n        INSERT INTO subscriptions (id, email, name, subscribed_at, status)\n        VALUES ($1, $2, $3, $4, 'pending_confirmation')\n        "
   }
 }
