@@ -155,8 +155,9 @@ async fn validate_credentials(
         .ok_or_else(|| PublishError::AuthError(anyhow::anyhow!("Unknown username.")))?;
 
     // Resource intensive, run in separate threadpool
+    let current_span = tracing::Span::current();
     tokio::task::spawn_blocking(move || {
-        verify_password_hash(expected_password_hash, credentials.password)
+        current_span.in_scope(|| verify_password_hash(expected_password_hash, credentials.password))
     })
     .await
     .context("Failed to spawn blocking task.")
