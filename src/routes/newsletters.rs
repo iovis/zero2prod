@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 use crate::domain::SubscriberEmail;
 use crate::email_client::EmailClient;
+use crate::telemetry::spawn_blocking_with_tracing;
 
 use super::error_chain_fmt;
 
@@ -155,9 +156,8 @@ async fn validate_credentials(
         .ok_or_else(|| PublishError::AuthError(anyhow::anyhow!("Unknown username.")))?;
 
     // Resource intensive, run in separate threadpool
-    let current_span = tracing::Span::current();
-    tokio::task::spawn_blocking(move || {
-        current_span.in_scope(|| verify_password_hash(expected_password_hash, credentials.password))
+    spawn_blocking_with_tracing(move || {
+        verify_password_hash(expected_password_hash, credentials.password)
     })
     .await
     .context("Failed to spawn blocking task.")
