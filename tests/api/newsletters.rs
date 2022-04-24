@@ -6,7 +6,7 @@ use wiremock::{Mock, ResponseTemplate};
 use crate::helpers::{spawn_app, ConfirmationLinks, TestApp};
 
 #[tokio::test]
-async fn newsletteres_are_not_delivered_to_unconfirmed_subscribers() {
+async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
     let app = spawn_app().await;
     create_unconfirmed_subscriber(&app).await;
 
@@ -30,7 +30,7 @@ async fn newsletteres_are_not_delivered_to_unconfirmed_subscribers() {
 }
 
 #[tokio::test]
-async fn newsletteres_are_delivered_to_confirmed_subscribers() {
+async fn newsletters_are_delivered_to_confirmed_subscribers() {
     let app = spawn_app().await;
     create_confirmed_subscriber(&app).await;
 
