@@ -22,4 +22,8 @@ async fn an_error_flash_message_is_set_on_failure() {
 
     let html_page = app.get_login_html().await;
     assert!(html_page.contains(r#"Authentication failed"#));
+
+    // It doesn't show the flash message the second time
+    let html_page = app.get_login_html().await;
+    assert!(!html_page.contains(r#"Authentication failed"#));
 }
