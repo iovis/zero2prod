@@ -4,7 +4,7 @@ use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::authentication::{validate_credentials, AuthError, Credentials};
+use crate::authentication::{self, validate_credentials, AuthError, Credentials};
 use crate::routes::admin::dashboard::get_username;
 use crate::session_state::TypedSession;
 use crate::utils::{error500, see_other};
@@ -50,9 +50,14 @@ pub async fn change_password(
                 FlashMessage::error("The current password is incorrect.").send();
                 Ok(see_other("/admin/password"))
             }
-            AuthError::UnexpectedError(_) => Err(error500(e).into()),
+            AuthError::UnexpectedError(_) => Err(error500(e)),
         };
     }
 
-    todo!()
+    authentication::change_password(user_id, form.0.new_password, &pool)
+        .await
+        .map_err(error500)?;
+
+    FlashMessage::error("Your password has been changed.").send();
+    Ok(see_other("/admin/password"))
 }
