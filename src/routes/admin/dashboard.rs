@@ -4,18 +4,16 @@ use anyhow::Context;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::session_state::TypedSession;
-use crate::utils::{error500, see_other};
+use crate::authentication::UserId;
+use crate::utils::error500;
 
 pub async fn admin_dashboard(
-    session: TypedSession,
+    user_id: web::ReqData<UserId>,
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let username = if let Some(user_id) = session.get_user_id().map_err(error500)? {
-        get_username(user_id, &pool).await.map_err(error500)?
-    } else {
-        return Ok(see_other("/login"));
-    };
+    let username = get_username(*user_id.into_inner(), &pool)
+        .await
+        .map_err(error500)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
