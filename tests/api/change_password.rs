@@ -18,11 +18,7 @@ async fn new_password_fields_must_match() {
     let new_password = Uuid::new_v4().to_string();
     let another_new_password = Uuid::new_v4().to_string();
 
-    app.post_login(&serde_json::json!({
-        "username": &app.test_user.username,
-        "password": &app.test_user.password
-    }))
-    .await;
+    app.login().await;
 
     let response = app
         .post_change_password(&serde_json::json!({
@@ -46,11 +42,7 @@ async fn current_password_must_be_valid() {
     let new_password = Uuid::new_v4().to_string();
     let wrong_password = Uuid::new_v4().to_string();
 
-    app.post_login(&json!({
-        "username": &app.test_user.username,
-        "password": &app.test_user.password,
-    }))
-    .await;
+    app.login().await;
 
     let response = app
         .post_change_password(&json!({
@@ -71,12 +63,7 @@ async fn changing_password_works() {
     let app = spawn_app().await;
     let new_password = Uuid::new_v4().to_string();
 
-    let response = app
-        .post_login(&json!({
-            "username": app.test_user.username,
-            "password": app.test_user.password,
-        }))
-        .await;
+    let response = app.login().await;
 
     assert_is_redirect_to(&response, "/admin/dashboard");
 

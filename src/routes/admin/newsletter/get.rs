@@ -3,16 +3,14 @@ use actix_web::HttpResponse;
 use actix_web_flash_messages::IncomingFlashMessages;
 use std::fmt::Write;
 
-pub async fn change_password_form(
-    flash_messages: IncomingFlashMessages,
-) -> Result<HttpResponse, actix_web::Error> {
+pub async fn issue_newsletter_form(flash_messages: IncomingFlashMessages) -> HttpResponse {
     let mut msg_html = String::new();
 
     for message in flash_messages.iter() {
         writeln!(msg_html, "<p><i>{}</i></p>", message.content()).unwrap();
     }
 
-    Ok(HttpResponse::Ok()
+    HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(format!(
             r#"
@@ -20,7 +18,7 @@ pub async fn change_password_form(
             <html lang="en">
 
             <head>
-              <title>Change Password</title>
+              <title>Send Newsletter</title>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
             </head>
@@ -28,20 +26,21 @@ pub async fn change_password_form(
             <body>
               {msg_html}
 
-              <form action="/admin/password" method="post">
-                <label>Current Password
-                  <input type="password" placeholder="Enter current password" name="current_password">
-                </label>
+              <form action="/admin/newsletters" method="post">
+                <label>Title</label>
                 <br>
-                <label>New Password
-                  <input type="password" placeholder="Enter new password" name="new_password">
-                </label>
+                <input type="text" placeholder="Title" name="title">
                 <br>
-                <label>Confirm new Password
-                  <input type="password" placeholder="Confirm your password" name="new_password_check">
-                </label>
+                <label>Plain text content</label>
+                <br>
+                <textarea placeholder="Plain text content" name="content_text"></textarea>
+                <br>
+                <label>HTML content</label>
+                <br>
+                <textarea placeholder="HTML content" name="content_html"></textarea>
 
-                <button type="submit">Change password</button>
+                <br>
+                <button type="submit">Submit</button>
               </form>
 
               <p><a href="/admin/dashboard">&lt;- Back</a></p>
@@ -49,5 +48,5 @@ pub async fn change_password_form(
 
             </html>
             "#
-        )))
+        ))
 }
