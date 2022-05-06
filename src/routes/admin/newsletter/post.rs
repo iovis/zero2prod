@@ -6,38 +6,45 @@ use sqlx::PgPool;
 
 use crate::domain::SubscriberEmail;
 use crate::email_client::EmailClient;
-use crate::utils::{error500, see_other};
+use crate::idempotency::IdempotencyKey;
+use crate::utils::{e400, e500, see_other};
 
+// TODO: fixing again
 #[derive(Deserialize)]
 pub struct FormData {
     title: String,
     html_content: String,
     text_content: String,
+    idempotency_key: String,
 }
 
-#[tracing::instrument(name = "Publish a newsletter issue", skip(body, pool, email_client))]
+#[tracing::instrument(name = "Publish a newsletter issue", skip(form, pool, email_client))]
 pub async fn publish_newsletter(
-    body: web::Form<FormData>,
+    form: web::Form<FormData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let subscribers = get_confirmed_subscribers(&pool).await.map_err(error500)?;
+    let FormData {
+        title,
+        html_content,
+        text_content,
+        idempotency_key,
+    } = form.0;
+
+    let idempotency_key: IdempotencyKey = idempotency_key.try_into().map_err(e400)?;
+
+    let subscribers = get_confirmed_subscribers(&pool).await.map_err(e500)?;
 
     for subscriber in subscribers {
         match subscriber {
             Ok(subscriber) => {
                 email_client
-                    .send_email(
-                        &subscriber.email,
-                        &body.title,
-                        &body.html_content,
-                        &body.text_content,
-                    )
+                    .send_email(&subscriber.email, &title, &html_content, &text_content)
                     .await
                     .with_context(|| {
                         format!("Failed to send newsletter issue to {}", subscriber.email)
                     })
-                    .map_err(error500)?;
+                    .map_err(e500)?;
             }
             Err(error) => {
                 tracing::warn!(

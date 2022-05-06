@@ -24,6 +24,7 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
         "title": "Newsletter title",
         "text_content": "Newsletter body as plain text",
         "html_content": "<p>Newsletter body as HTML</p>",
+        "idempotency_key": Uuid::new_v4().to_string(),
     });
 
     let response = app.post_publish_newsletter(&newsletter_request_body).await;
@@ -50,6 +51,7 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
         "title": "Newsletter title",
         "text_content": "Newsletter body as plain text",
         "html_content": "<p>Newsletter body as HTML</p>",
+        "idempotency_key": Uuid::new_v4().to_string(),
     });
 
     let response = app.post_publish_newsletter(&newsletter_request_body).await;
@@ -67,6 +69,7 @@ async fn newsletters_returns_400_for_invalid_data() {
             json!({
                 "text_content": "Newsletter body as plain text",
                 "html_content": "<p>Newsletter body as HTML</p>",
+                "idempotency_key": Uuid::new_v4().to_string(),
             }),
             "missing title",
         ),
@@ -94,6 +97,7 @@ async fn requests_missing_authorization_are_rejected() {
         "title": "Newsletter title",
         "text_content": "Newsletter body as plain text",
         "html_content": "<p>Newsletter body as HTML</p>",
+        "idempotency_key": Uuid::new_v4().to_string(),
     });
 
     let response = app.post_publish_newsletter(&newsletter_request_body).await;

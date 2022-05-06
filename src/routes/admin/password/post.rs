@@ -6,7 +6,7 @@ use sqlx::PgPool;
 
 use crate::authentication::{self, validate_credentials, AuthError, Credentials, UserId};
 use crate::routes::admin::dashboard::get_username;
-use crate::utils::{error500, see_other};
+use crate::utils::{e500, see_other};
 
 #[derive(Deserialize)]
 pub struct FormData {
@@ -31,7 +31,7 @@ pub async fn change_password(
         return Ok(see_other("/admin/password"));
     }
 
-    let username = get_username(*user_id, &pool).await.map_err(error500)?;
+    let username = get_username(*user_id, &pool).await.map_err(e500)?;
 
     let credentials = Credentials {
         username,
@@ -44,13 +44,13 @@ pub async fn change_password(
                 FlashMessage::error("The current password is incorrect.").send();
                 Ok(see_other("/admin/password"))
             }
-            AuthError::UnexpectedError(_) => Err(error500(e)),
+            AuthError::UnexpectedError(_) => Err(e500(e)),
         };
     }
 
     authentication::change_password(*user_id, form.0.new_password, &pool)
         .await
-        .map_err(error500)?;
+        .map_err(e500)?;
 
     FlashMessage::error("Your password has been changed.").send();
     Ok(see_other("/admin/password"))

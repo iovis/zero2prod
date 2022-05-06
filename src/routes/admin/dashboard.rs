@@ -5,7 +5,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::authentication::UserId;
-use crate::utils::error500;
+use crate::utils::e500;
 
 pub async fn admin_dashboard(
     user_id: web::ReqData<UserId>,
@@ -13,7 +13,7 @@ pub async fn admin_dashboard(
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = get_username(*user_id.into_inner(), &pool)
         .await
-        .map_err(error500)?;
+        .map_err(e500)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
