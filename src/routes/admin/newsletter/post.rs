@@ -3,7 +3,7 @@ use actix_web::{web, HttpResponse};
 use actix_web_flash_messages::FlashMessage;
 use anyhow::Context;
 use serde::Deserialize;
-use sqlx::{PgPool, Transaction, Postgres};
+use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 use crate::authentication::UserId;
@@ -119,7 +119,7 @@ async fn insert_newsletter_issue(
     transaction: &mut Transaction<'_, Postgres>,
     title: &str,
     text_content: &str,
-    html_content: &str
+    html_content: &str,
 ) -> Result<Uuid, sqlx::Error> {
     let newsletter_issue_id = Uuid::new_v4();
 
@@ -143,4 +143,27 @@ async fn insert_newsletter_issue(
     .await?;
 
     Ok(newsletter_issue_id)
+}
+
+#[tracing::instrument(skip_all)]
+async fn enqueue_delivery_tasks(
+    transaction: &mut Transaction<'_, Postgres>,
+    newsletter_issue_id: Uuid,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        INSERT INTO issue_delivery_queue(
+            newsletter_issue_id,
+            subscriber_email
+        )
+        SELECT $1, email
+        FROM subscriptions
+        WHERE status = 'confirmed'
+        "#,
+        newsletter_issue_id
+    )
+    .execute(transaction)
+    .await?;
+
+    Ok(())
 }
